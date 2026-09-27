@@ -185,39 +185,39 @@ METHOD /iwbep/if_mgw_appl_srv_runtime~create_deep_entity.
 ENDMETHOD.
 
 
-METHOD /iwbep/if_mgw_appl_srv_runtime~execute_action.
-    DATA: ld_ordemid  TYPE zovcab-ordemid.
-    DATA: ld_status   TYPE zovcab-status.
-    DATA: lt_bapiret2 TYPE STANDARD TABLE OF zcl_zov_mpc_ext=>ts_mensagem.
-    DATA: ls_bapiret2 TYPE zcl_zov_mpc_ext=>ts_mensagem.
+method /IWBEP/IF_MGW_APPL_SRV_RUNTIME~EXECUTE_ACTION.
+  DATA: ld_ordemid  TYPE zovcab-ordemid.
+  DATA: ld_status   TYPE zovcab-status.
+  DATA: lt_bapiret2 TYPE STANDARD TABLE OF zcl_zov_mpc_ext=>mensagem2.
+  DATA: ls_bapiret2 TYPE zcl_zov_mpc_ext=>mensagem2.
 
-    IF iv_action_name = 'ZFI_ATUALIZA_STATUS'.
-      ld_ordemid = it_parameter[ name = 'ID_ORDEMID' ]-value.
-      ld_status  = it_parameter[ name = 'ID_STATUS' ]-value.
+  IF iv_action_name = 'ZFI_ATUALIZA_STATUS'.
+    ld_ordemid = it_parameter[ name = 'ID_ORDEMID' ]-value.
+    ld_status  = it_parameter[ name = 'ID_STATUS' ]-value.
 
-      UPDATE zovcab
-         SET status  = 'N'
-       WHERE ordemid = ld_ordemid.
+    UPDATE zovcab
+       SET status = ld_status
+     WHERE ordemid = ld_ordemid.
 
-      IF sy-subrc = 0.
-        CLEAR ls_bapiret2.
-        ls_bapiret2-type    = 'S'.
-        ls_bapiret2-message = 'Status atualizado'.
-        APPEND ls_bapiret2 TO lt_bapiret2.
-      ELSE.
-        CLEAR ls_bapiret2.
-        ls_bapiret2-type    = 'S'.
-        ls_bapiret2-message = 'Erro ao atualizar status'.
-        APPEND ls_bapiret2 TO lt_bapiret2.
-      ENDIF.
+    IF sy-subrc = 0.
+      CLEAR ls_bapiret2.
+      ls_bapiret2-tipo     = 'S'.
+      ls_bapiret2-mensagem = |Status da ordem { ld_ordemid } atualizado|.
+      APPEND ls_bapiret2 TO lt_bapiret2.
+    ELSE.
+      CLEAR ls_bapiret2.
+      ls_bapiret2-tipo     = 'E'.
+      ls_bapiret2-mensagem = |Erro ao atualizar status da ordem { ld_ordemid }|.
+      APPEND ls_bapiret2 TO lt_bapiret2.
     ENDIF.
+  ENDIF.
 
-    CALL METHOD me->copy_data_to_ref
-      EXPORTING
-        is_data = lt_bapiret2
-      CHANGING
-        cr_data = er_data.
-  ENDMETHOD.
+  CALL METHOD me->copy_data_to_ref
+    EXPORTING
+      is_data = lt_bapiret2
+    CHANGING
+      cr_data = er_data.
+endmethod.
 
 
   method MENSAGEMSET_CREATE_ENTITY.
